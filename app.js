@@ -226,12 +226,11 @@ const App = {
   downloadPdf: (elementId, filename) => {
     const printElement = document.getElementById(elementId);
     
-    // FIX: Temporarily force the element to render at a full 800px width off-screen so mobile screens don't cut it off
+    // FIX: Move it off-screen to the left (-9999px) instead of hiding it behind the background!
     printElement.style.display = 'block';
     printElement.style.position = 'absolute';
-    printElement.style.left = '0';
+    printElement.style.left = '-9999px'; // Moves it safely out of view horizontally
     printElement.style.top = '0';
-    printElement.style.zIndex = '-9999';
     printElement.style.width = '800px'; 
 
     const opt = {
@@ -241,7 +240,7 @@ const App = {
       html2canvas: { 
           scale: 2, 
           useCORS: true, 
-          windowWidth: 800 // CRUCIAL FIX: This tells the engine to pretend it's on a desktop screen!
+          windowWidth: 800 // Forces desktop width
       },
       jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
     };
@@ -251,6 +250,7 @@ const App = {
       printElement.style.display = 'none';
       printElement.style.position = 'static';
       printElement.style.width = 'auto';
+      printElement.style.left = 'auto'; 
     });
   }
 };
