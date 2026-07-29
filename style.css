@@ -1,0 +1,41 @@
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+body { background-color: #f5f7fb; padding: 20px 10px; color: #333; line-height: 1.6; }
+.container { max-width: 600px; margin: 0 auto; }
+.card { background: white; padding: 20px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+
+h1, h2 { color: #4a148c; text-align: center; margin-bottom: 15px; }
+.input-field, select { width: 100%; padding: 12px; margin-top: 8px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; }
+
+.btn { width: 100%; color: white; border: none; padding: 15px; font-size: 1.1rem; font-weight: bold; border-radius: 8px; cursor: pointer; transition: background 0.3s; margin-bottom: 10px; }
+.btn-primary { background: #673ab7; }
+.btn-success { background: #2e7d32; }
+.btn-secondary { background: #757575; color: white; }
+.btn-outline { background: transparent; color: #673ab7; border: 2px solid #673ab7; }
+
+.hidden { display: none !important; }
+.switch-link { text-align: center; margin-top: 15px; }
+.switch-link a { color: #673ab7; font-weight: bold; text-decoration: none; }
+
+.install-banner { background: #e8f5e9; border: 2px solid #2e7d32; text-align: center; }
+.notification-banner { background: #ffeb3b; padding: 15px; border-radius: 8px; margin-bottom: 15px; font-weight: bold; text-align: center; color: #333; }
+.paper-status { text-align: center; padding: 20px; background: #e3f2fd; border-radius: 8px; margin-bottom: 20px; border: 1px solid #90caf9; }
+
+.timer-banner { position: -webkit-sticky; position: sticky; top: 0; background: #4a148c; color: white; text-align: center; padding: 12px; font-size: 1.2rem; font-weight: bold; border-radius: 8px; margin-bottom: 20px; z-index: 1000; }
+.option-label { display: block; padding: 15px; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 8px; margin-top: 10px; cursor: pointer; font-size: 1rem; transition: 0.2s; }
+.option-label:active { background: #e2d9f3; }
+input[type="radio"] { margin-right: 10px; transform: scale(1.2); }
+.btn-clear { background: transparent; border: none; color: #d32f2f; cursor: pointer; font-size: 0.9rem; font-weight: bold; margin-top: 12px; float: right; padding: 5px; }
+
+.table-wrapper { overflow-x: auto; margin-top: 15px; }
+table { width: 100%; border-collapse: collapse; min-width: 450px; }
+th, td { border: 1px solid #ddd; padding: 10px; text-align: center; font-size: 0.95rem; }
+th { background-color: #673ab7; color: white; }
+
+.loader { border: 4px solid #f3f3f3; border-top: 4px solid #673ab7; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* PDF Text Cutoff Fix */
+#print-area, #reg-card-print { display: none; background: white; color: black; }
+.pdf-container { width: 800px; padding: 30px; word-wrap: break-word; overflow-wrap: break-word; background: #fff; }
+.pdf-question-block { page-break-inside: avoid; margin-bottom: 15px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background: #fafafa; }
+.pdf-text { word-wrap: break-word; white-space: pre-wrap; font-size: 16px; color: #000; }
