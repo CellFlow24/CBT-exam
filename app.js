@@ -199,7 +199,6 @@ const App = {
   },
   
   downloadRegCard: () => {
-    // FIX: Using strict inline styles and a left-aligned data block to ensure it renders perfectly on all devices.
     let printHtml = `
       <div style="width: 100%; max-width: 700px; margin: 0 auto; padding: 30px; border: 2px solid #673ab7; text-align: center; background-color: #ffffff; font-family: 'Segoe UI', Arial, sans-serif; box-sizing: border-box;">
         <img src="logo.png" style="width: 80px; margin-bottom: 15px;">
@@ -219,38 +218,43 @@ const App = {
         <p style="color:#757575; font-size: 14px;">Please keep this ID safe for future mock exams.</p>
       </div>
     `;
-    document.getElementById('reg-card-print').innerHTML = printHtml;
-    App.downloadPdf('reg-card-print', `${App.currentUser.name}_Registration_Card`);
+    
+    // Create a temporary hidden container to hold this HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.id = 'temp-reg-card';
+    tempDiv.innerHTML = printHtml;
+    tempDiv.style.display = 'none';
+    document.body.appendChild(tempDiv);
+
+    // Call the download function, then delete the temp container
+    App.downloadPdf('temp-reg-card', `${App.currentUser.name}_Registration_Card`);
+    setTimeout(() => document.body.removeChild(tempDiv), 2000);
   },
 
   downloadPdf: (elementId, filename) => {
-    const printElement = document.getElementById(elementId);
+    const rawHtml = document.getElementById(elementId).innerHTML;
     
-    // FIX: Move it off-screen to the left (-9999px) instead of hiding it behind the background!
-    printElement.style.display = 'block';
-    printElement.style.position = 'absolute';
-    printElement.style.left = '-9999px'; // Moves it safely out of view horizontally
-    printElement.style.top = '0';
-    printElement.style.width = '800px'; 
+    // Ghost Container Method for 100% Mobile Accuracy
+    const tempContainer = document.createElement('div');
+    tempContainer.innerHTML = rawHtml;
+    tempContainer.style.position = 'absolute';
+    tempContainer.style.top = '0';
+    tempContainer.style.left = '0';
+    tempContainer.style.zIndex = '-1'; // Hides it behind the app
+    tempContainer.style.width = '800px'; 
+    tempContainer.style.backgroundColor = '#ffffff'; 
+    document.body.appendChild(tempContainer);
 
     const opt = {
       margin: 0.5,
       filename: `${filename}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { 
-          scale: 2, 
-          useCORS: true, 
-          windowWidth: 800 // Forces desktop width
-      },
+      html2canvas: { scale: 2, useCORS: true, windowWidth: 800 },
       jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
     };
     
-    html2pdf().set(opt).from(printElement).save().then(() => {
-      // Clean up the styles after the download is complete
-      printElement.style.display = 'none';
-      printElement.style.position = 'static';
-      printElement.style.width = 'auto';
-      printElement.style.left = 'auto'; 
+    html2pdf().set(opt).from(tempContainer).save().then(() => {
+      document.body.removeChild(tempContainer);
     });
   }
 };
