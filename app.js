@@ -199,41 +199,60 @@ const App = {
   },
   
   downloadRegCard: () => {
-    // FIX: Added Age and Gender to the print layout
+    // FIX: Using strict inline styles and a left-aligned data block to ensure it renders perfectly on all devices.
     let printHtml = `
-      <div class="pdf-container" style="border: 2px solid #673ab7; text-align: center;">
-        <img src="logo.png" style="width: 100px; margin-bottom: 20px;">
-        <h2 style="color:#673ab7;">AIIMS CBT Mock Test</h2>
-        <h3>Candidate Registration Card</h3>
-        <hr style="margin:20px 0;">
-        <p class="pdf-text" style="font-size:18px;"><strong>Name:</strong> ${App.currentUser.name}</p>
-        <p class="pdf-text" style="font-size:18px;"><strong>Age:</strong> ${App.currentUser.age}</p>
-        <p class="pdf-text" style="font-size:18px;"><strong>Gender:</strong> ${App.currentUser.gender}</p>
-        <p class="pdf-text" style="font-size:18px;"><strong>Registration No:</strong> ${App.currentUser.regNum}</p>
-        <p class="pdf-text" style="font-size:18px;"><strong>Email ID:</strong> ${App.currentUser.email}</p>
-        <hr style="margin:20px 0;">
-        <p style="color:#757575;">Keep this ID safe for future mock exams.</p>
+      <div style="width: 100%; max-width: 700px; margin: 0 auto; padding: 30px; border: 2px solid #673ab7; text-align: center; background-color: #ffffff; font-family: 'Segoe UI', Arial, sans-serif; box-sizing: border-box;">
+        <img src="logo.png" style="width: 80px; margin-bottom: 15px;">
+        <h2 style="color:#673ab7; margin-bottom: 5px; font-size: 24px;">AIIMS CBT Mock Test</h2>
+        <h3 style="color:#333; margin-bottom: 20px; font-size: 18px;">Candidate Registration Card</h3>
+        <hr style="border: 0; border-top: 1px solid #ccc; margin: 15px 0;">
+        
+        <div style="text-align: left; max-width: 350px; margin: 0 auto;">
+            <p style="font-size:16px; margin: 8px 0; color: #000;"><strong>Name:</strong> ${App.currentUser.name}</p>
+            <p style="font-size:16px; margin: 8px 0; color: #000;"><strong>Age:</strong> ${App.currentUser.age}</p>
+            <p style="font-size:16px; margin: 8px 0; color: #000;"><strong>Gender:</strong> ${App.currentUser.gender}</p>
+            <p style="font-size:16px; margin: 8px 0; color: #000;"><strong>Registration No:</strong> ${App.currentUser.regNum}</p>
+            <p style="font-size:16px; margin: 8px 0; color: #000;"><strong>Email ID:</strong> ${App.currentUser.email}</p>
+        </div>
+        
+        <hr style="border: 0; border-top: 1px solid #ccc; margin: 15px 0;">
+        <p style="color:#757575; font-size: 14px;">Please keep this ID safe for future mock exams.</p>
       </div>
     `;
     document.getElementById('reg-card-print').innerHTML = printHtml;
     App.downloadPdf('reg-card-print', `${App.currentUser.name}_Registration_Card`);
   },
-  
+
   downloadPdf: (elementId, filename) => {
     const printElement = document.getElementById(elementId);
+    
+    // FIX: Temporarily force the element to render at a full 800px width off-screen so mobile screens don't cut it off
     printElement.style.display = 'block';
+    printElement.style.position = 'absolute';
+    printElement.style.left = '0';
+    printElement.style.top = '0';
+    printElement.style.zIndex = '-9999';
+    printElement.style.width = '800px'; 
+
     const opt = {
       margin: 0.5,
       filename: `${filename}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
+      html2canvas: { 
+          scale: 2, 
+          useCORS: true, 
+          windowWidth: 800 // CRUCIAL FIX: This tells the engine to pretend it's on a desktop screen!
+      },
       jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
     };
+    
     html2pdf().set(opt).from(printElement).save().then(() => {
+      // Clean up the styles after the download is complete
       printElement.style.display = 'none';
+      printElement.style.position = 'static';
+      printElement.style.width = 'auto';
     });
   }
-};
 
 // --- PWA INSTALLATION LOGIC ---
 let deferredPrompt;
