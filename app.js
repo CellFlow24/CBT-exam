@@ -232,27 +232,38 @@ const App = {
   },
 
   downloadPdf: (elementId, filename) => {
+    // 1. Grab the raw HTML content we generated in the hidden div
     const rawHtml = document.getElementById(elementId).innerHTML;
     
-    // Ghost Container Method for 100% Mobile Accuracy
+    // 2. Create a temporary "Ghost" container
     const tempContainer = document.createElement('div');
     tempContainer.innerHTML = rawHtml;
+    
+    // 3. Position it at top: 0, left: 0 so it's inside the viewport (prevents blank pages)
+    // But put it BEHIND the main app (z-index: -1) so the user never sees it.
     tempContainer.style.position = 'absolute';
     tempContainer.style.top = '0';
     tempContainer.style.left = '0';
-    tempContainer.style.zIndex = '-1'; // Hides it behind the app
+    tempContainer.style.zIndex = '-1';
     tempContainer.style.width = '800px'; 
-    tempContainer.style.backgroundColor = '#ffffff'; 
+    tempContainer.style.backgroundColor = '#ffffff'; // Force white background
+    
+    // 4. Attach it to the app so CSS applies correctly
     document.body.appendChild(tempContainer);
 
     const opt = {
       margin: 0.5,
       filename: `${filename}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, windowWidth: 800 },
+      html2canvas: { 
+          scale: 2, 
+          useCORS: true, 
+          windowWidth: 800 // Forces desktop width mapping
+      },
       jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
     };
     
+    // 5. Generate the PDF, then immediately delete the Ghost container
     html2pdf().set(opt).from(tempContainer).save().then(() => {
       document.body.removeChild(tempContainer);
     });
