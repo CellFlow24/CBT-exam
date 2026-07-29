@@ -163,13 +163,13 @@ const App = {
 
   // --- PDF GENERATION ---
   buildPdfAndShowResult: (res) => {
-    // Ensures words don't get cut off by fixing width to 800px.
+    // FIX: Added "/ maxScore" and added "font-weight: bold;" to the answer text
     let printHtml = `
       <div class="pdf-container">
         <h2 style="color:#673ab7; text-align:center; margin-bottom:20px;">AIIMS CBT - Answer Key SET ${res.setNumber}</h2>
         <p class="pdf-text"><strong>Candidate:</strong> ${App.currentUser.name}</p>
         <p class="pdf-text"><strong>Reg No:</strong> ${App.currentUser.regNum}</p>
-        <p class="pdf-text"><strong>Final Score:</strong> ${res.score}</p>
+        <p class="pdf-text"><strong>Final Score:</strong> ${res.score} / ${res.maxScore}</p>
         <hr style="margin:20px 0; border:1px solid #ccc;">
     `;
     
@@ -178,8 +178,8 @@ const App = {
       printHtml += `
         <div class="pdf-question-block">
           <p class="pdf-text"><strong>Q${r.qNum}. ${r.question}</strong></p>
-          <p class="pdf-text" style="color:${clr}; margin:8px 0;">Your Ans: ${r.userAns} (${r.userText})</p>
-          ${!r.isCorrect ? `<p class="pdf-text" style="color:#2e7d32;">Correct Ans: ${r.correctAns} (${r.correctText})</p>` : ''}
+          <p class="pdf-text" style="color:${clr}; margin:8px 0; font-weight: bold;">Your Ans: ${r.userAns} (${r.userText})</p>
+          ${!r.isCorrect ? `<p class="pdf-text" style="color:#2e7d32; font-weight: bold;">Correct Ans: ${r.correctAns} (${r.correctText})</p>` : ''}
         </div>
       `;
     });
@@ -190,15 +190,16 @@ const App = {
     document.getElementById('exam-page').innerHTML = `
       <div class="card" style="text-align:center;">
         <h2>Exam Complete!</h2>
-        <p>Score: <strong>${res.score}</strong></p>
-        <p style="color:#666;">Detailed result emailed successfully.</p>
+        <p>Score: <strong>${res.score}</strong> / ${res.maxScore}</p>
+        <p style="color:#666;">Detailed result and PDF have been emailed to you successfully.</p>
         <button class="btn btn-primary" onclick="App.downloadPdf('print-area', '${App.currentUser.name}_Result_SET_${res.setNumber}')">Download Answer Sheet PDF</button>
         <button class="btn btn-secondary" onclick="App.loadDashboard()">Back to Dashboard</button>
       </div>
     `;
   },
-
+  
   downloadRegCard: () => {
+    // FIX: Added Age and Gender to the print layout
     let printHtml = `
       <div class="pdf-container" style="border: 2px solid #673ab7; text-align: center;">
         <img src="logo.png" style="width: 100px; margin-bottom: 20px;">
@@ -206,6 +207,8 @@ const App = {
         <h3>Candidate Registration Card</h3>
         <hr style="margin:20px 0;">
         <p class="pdf-text" style="font-size:18px;"><strong>Name:</strong> ${App.currentUser.name}</p>
+        <p class="pdf-text" style="font-size:18px;"><strong>Age:</strong> ${App.currentUser.age}</p>
+        <p class="pdf-text" style="font-size:18px;"><strong>Gender:</strong> ${App.currentUser.gender}</p>
         <p class="pdf-text" style="font-size:18px;"><strong>Registration No:</strong> ${App.currentUser.regNum}</p>
         <p class="pdf-text" style="font-size:18px;"><strong>Email ID:</strong> ${App.currentUser.email}</p>
         <hr style="margin:20px 0;">
@@ -215,7 +218,7 @@ const App = {
     document.getElementById('reg-card-print').innerHTML = printHtml;
     App.downloadPdf('reg-card-print', `${App.currentUser.name}_Registration_Card`);
   },
-
+  
   downloadPdf: (elementId, filename) => {
     const printElement = document.getElementById(elementId);
     printElement.style.display = 'block';
