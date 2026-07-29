@@ -198,7 +198,7 @@ const App = {
     `;
   },
   
-  downloadRegCard: () => {downloadRegCard: () => {
+  downloadRegCard: () => {
     // 1. Give the user visual feedback that it is loading
     const btn = document.querySelector('button[onclick="App.downloadRegCard()"]');
     const originalText = btn.innerText;
@@ -234,7 +234,7 @@ const App = {
     });
   },
 
-  // WE STILL NEED THIS FOR THE EXAM ANSWER SHEET!
+  // Used strictly for downloading the Exam Answer Sheet on the frontend
   downloadPdf: (elementId, filename) => {
     const rawHtml = document.getElementById(elementId).innerHTML;
     
@@ -260,30 +260,8 @@ const App = {
       document.body.removeChild(tempContainer); // Cleanup
     });
   }
-}; // <--- THIS CLOSING BRACKET WAS MISSING!
+}; // ALL BRACKETS PROPERLY CLOSED!
 
-// --- PWA INSTALLATION LOGIC ---
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  document.getElementById('install-banner').classList.remove('hidden');
-});
-
-document.getElementById('btn-install-app').addEventListener('click', async () => {
-  document.getElementById('install-banner').classList.add('hidden');
-  deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-  deferredPrompt = null;
-});
-
-// --- REGISTER SERVICE WORKER ---
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js');
-  });
-}
-  
 // --- PWA INSTALLATION LOGIC ---
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e) => {
