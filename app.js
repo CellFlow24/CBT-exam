@@ -198,7 +198,7 @@ const App = {
     `;
   },
   
-  downloadRegCard: () => {
+  downloadRegCard: () => {downloadRegCard: () => {
     // 1. Give the user visual feedback that it is loading
     const btn = document.querySelector('button[onclick="App.downloadRegCard()"]');
     const originalText = btn.innerText;
@@ -233,6 +233,56 @@ const App = {
       }
     });
   },
+
+  // WE STILL NEED THIS FOR THE EXAM ANSWER SHEET!
+  downloadPdf: (elementId, filename) => {
+    const rawHtml = document.getElementById(elementId).innerHTML;
+    
+    const tempContainer = document.createElement('div');
+    tempContainer.innerHTML = rawHtml;
+    tempContainer.style.position = 'absolute';
+    tempContainer.style.top = '0';
+    tempContainer.style.left = '0';
+    tempContainer.style.zIndex = '-1';
+    tempContainer.style.width = '800px'; 
+    tempContainer.style.backgroundColor = '#ffffff'; 
+    document.body.appendChild(tempContainer);
+
+    const opt = {
+      margin: 0.5,
+      filename: `${filename}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, windowWidth: 800 },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+    
+    html2pdf().set(opt).from(tempContainer).save().then(() => {
+      document.body.removeChild(tempContainer); // Cleanup
+    });
+  }
+}; // <--- THIS CLOSING BRACKET WAS MISSING!
+
+// --- PWA INSTALLATION LOGIC ---
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-banner').classList.remove('hidden');
+});
+
+document.getElementById('btn-install-app').addEventListener('click', async () => {
+  document.getElementById('install-banner').classList.add('hidden');
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+});
+
+// --- REGISTER SERVICE WORKER ---
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js');
+  });
+}
   
 // --- PWA INSTALLATION LOGIC ---
 let deferredPrompt;
