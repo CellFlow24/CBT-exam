@@ -199,73 +199,72 @@ const App = {
   },
   
   downloadRegCard: () => {
+    // 1. Exact HTML match to what the Google Apps Script sends via email
     let printHtml = `
-      <div style="width: 100%; max-width: 700px; margin: 0 auto; padding: 30px; border: 2px solid #673ab7; text-align: center; background-color: #ffffff; font-family: 'Segoe UI', Arial, sans-serif; box-sizing: border-box;">
-        <img src="logo.png" style="width: 80px; margin-bottom: 15px;">
-        <h2 style="color:#673ab7; margin-bottom: 5px; font-size: 24px;">AIIMS CBT Mock Test</h2>
-        <h3 style="color:#333; margin-bottom: 20px; font-size: 18px;">Candidate Registration Card</h3>
-        <hr style="border: 0; border-top: 1px solid #ccc; margin: 15px 0;">
-        
-        <div style="text-align: left; max-width: 350px; margin: 0 auto;">
+      <div style="font-family: 'Segoe UI', Arial, sans-serif; text-align: center; padding: 30px; border: 2px solid #673ab7; width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <h2 style="color:#673ab7; margin-bottom: 5px;">AIIMS CBT Mock Test</h2>
+        <h3 style="color:#333; margin-bottom: 20px;">Candidate Registration Card</h3>
+        <hr style="border-top: 1px solid #ccc; margin: 15px 0;">
+        <div style="text-align: left; width: 350px; margin: 0 auto;">
             <p style="font-size:16px; margin: 8px 0; color: #000;"><strong>Name:</strong> ${App.currentUser.name}</p>
             <p style="font-size:16px; margin: 8px 0; color: #000;"><strong>Age:</strong> ${App.currentUser.age}</p>
             <p style="font-size:16px; margin: 8px 0; color: #000;"><strong>Gender:</strong> ${App.currentUser.gender}</p>
             <p style="font-size:16px; margin: 8px 0; color: #000;"><strong>Registration No:</strong> ${App.currentUser.regNum}</p>
             <p style="font-size:16px; margin: 8px 0; color: #000;"><strong>Email ID:</strong> ${App.currentUser.email}</p>
         </div>
-        
-        <hr style="border: 0; border-top: 1px solid #ccc; margin: 15px 0;">
-        <p style="color:#757575; font-size: 14px;">Please keep this ID safe for future mock exams.</p>
+        <hr style="border-top: 1px solid #ccc; margin: 15px 0;">
+        <p style="color:#757575; font-size: 14px;">Keep this ID safe for future mock exams.</p>
       </div>
     `;
     
-    // Create a temporary hidden container to hold this HTML
-    const tempDiv = document.createElement('div');
-    tempDiv.id = 'temp-reg-card';
-    tempDiv.innerHTML = printHtml;
-    tempDiv.style.display = 'none';
-    document.body.appendChild(tempDiv);
+    // 2. Direct Ghost Container mapping for the Registration Card
+    const tempContainer = document.createElement('div');
+    tempContainer.innerHTML = printHtml;
+    tempContainer.style.position = 'absolute';
+    tempContainer.style.top = '0';
+    tempContainer.style.left = '0';
+    tempContainer.style.zIndex = '-1'; 
+    tempContainer.style.width = '600px'; // Locked to 600px to match the email
+    tempContainer.style.backgroundColor = '#ffffff'; 
+    document.body.appendChild(tempContainer);
 
-    // Call the download function, then delete the temp container
-    App.downloadPdf('temp-reg-card', `${App.currentUser.name}_Registration_Card`);
-    setTimeout(() => document.body.removeChild(tempDiv), 2000);
+    const opt = {
+      margin: 0.5,
+      filename: `${App.currentUser.name}_Registration_Card.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, windowWidth: 600 }, // Forces 600px render width
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+    
+    html2pdf().set(opt).from(tempContainer).save().then(() => {
+      document.body.removeChild(tempContainer); // Cleanup
+    });
   },
 
   downloadPdf: (elementId, filename) => {
-    // 1. Grab the raw HTML content we generated in the hidden div
+    // This function remains exclusively for the broader Answer Sheet (800px width)
     const rawHtml = document.getElementById(elementId).innerHTML;
     
-    // 2. Create a temporary "Ghost" container
     const tempContainer = document.createElement('div');
     tempContainer.innerHTML = rawHtml;
-    
-    // 3. Position it at top: 0, left: 0 so it's inside the viewport (prevents blank pages)
-    // But put it BEHIND the main app (z-index: -1) so the user never sees it.
     tempContainer.style.position = 'absolute';
     tempContainer.style.top = '0';
     tempContainer.style.left = '0';
     tempContainer.style.zIndex = '-1';
     tempContainer.style.width = '800px'; 
-    tempContainer.style.backgroundColor = '#ffffff'; // Force white background
-    
-    // 4. Attach it to the app so CSS applies correctly
+    tempContainer.style.backgroundColor = '#ffffff'; 
     document.body.appendChild(tempContainer);
 
     const opt = {
       margin: 0.5,
       filename: `${filename}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { 
-          scale: 2, 
-          useCORS: true, 
-          windowWidth: 800 // Forces desktop width mapping
-      },
+      html2canvas: { scale: 2, useCORS: true, windowWidth: 800 },
       jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
     };
     
-    // 5. Generate the PDF, then immediately delete the Ghost container
     html2pdf().set(opt).from(tempContainer).save().then(() => {
-      document.body.removeChild(tempContainer);
+      document.body.removeChild(tempContainer); // Cleanup
     });
   }
 };
