@@ -199,76 +199,41 @@ const App = {
   },
   
   downloadRegCard: () => {
-    // 1. Exact HTML match to what the Google Apps Script sends via email
-    let printHtml = `
-      <div style="font-family: 'Segoe UI', Arial, sans-serif; text-align: center; padding: 30px; border: 2px solid #673ab7; width: 600px; margin: 0 auto; background-color: #ffffff;">
-        <h2 style="color:#673ab7; margin-bottom: 5px;">AIIMS CBT Mock Test</h2>
-        <h3 style="color:#333; margin-bottom: 20px;">Candidate Registration Card</h3>
-        <hr style="border-top: 1px solid #ccc; margin: 15px 0;">
-        <div style="text-align: left; width: 350px; margin: 0 auto;">
-            <p style="font-size:16px; margin: 8px 0; color: #000;"><strong>Name:</strong> ${App.currentUser.name}</p>
-            <p style="font-size:16px; margin: 8px 0; color: #000;"><strong>Age:</strong> ${App.currentUser.age}</p>
-            <p style="font-size:16px; margin: 8px 0; color: #000;"><strong>Gender:</strong> ${App.currentUser.gender}</p>
-            <p style="font-size:16px; margin: 8px 0; color: #000;"><strong>Registration No:</strong> ${App.currentUser.regNum}</p>
-            <p style="font-size:16px; margin: 8px 0; color: #000;"><strong>Email ID:</strong> ${App.currentUser.email}</p>
-        </div>
-        <hr style="border-top: 1px solid #ccc; margin: 15px 0;">
-        <p style="color:#757575; font-size: 14px;">Keep this ID safe for future mock exams.</p>
-      </div>
-    `;
-    
-    // 2. Direct Ghost Container mapping for the Registration Card
-    const tempContainer = document.createElement('div');
-    tempContainer.innerHTML = printHtml;
-    tempContainer.style.position = 'absolute';
-    tempContainer.style.top = '0';
-    tempContainer.style.left = '0';
-    tempContainer.style.zIndex = '-1'; 
-    tempContainer.style.width = '600px'; // Locked to 600px to match the email
-    tempContainer.style.backgroundColor = '#ffffff'; 
-    document.body.appendChild(tempContainer);
+    // 1. Give the user visual feedback that it is loading
+    const btn = document.querySelector('button[onclick="App.downloadRegCard()"]');
+    const originalText = btn.innerText;
+    btn.innerText = "Generating PDF...";
+    btn.disabled = true;
 
-    const opt = {
-      margin: 0.5,
-      filename: `${App.currentUser.name}_Registration_Card.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, windowWidth: 600 }, // Forces 600px render width
-      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    // 2. Send the user's data to the backend
+    const payload = {
+      name: App.currentUser.name,
+      age: App.currentUser.age,
+      gender: App.currentUser.gender,
+      regNum: App.currentUser.regNum,
+      email: App.currentUser.email
     };
-    
-    html2pdf().set(opt).from(tempContainer).save().then(() => {
-      document.body.removeChild(tempContainer); // Cleanup
+
+    // 3. Request the PDF directly from Google Apps Script
+    App.postData('downloadRegCard', payload, (res) => {
+      // Reset button
+      btn.innerText = originalText;
+      btn.disabled = false;
+      
+      if(res.success) {
+        // 4. Force the browser to download the exact PDF file sent from the server
+        const link = document.createElement('a');
+        link.href = "data:application/pdf;base64," + res.fileData;
+        link.download = res.fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        alert("Failed to generate PDF. Please try again.");
+      }
     });
   },
-
-  downloadPdf: (elementId, filename) => {
-    // This function remains exclusively for the broader Answer Sheet (800px width)
-    const rawHtml = document.getElementById(elementId).innerHTML;
-    
-    const tempContainer = document.createElement('div');
-    tempContainer.innerHTML = rawHtml;
-    tempContainer.style.position = 'absolute';
-    tempContainer.style.top = '0';
-    tempContainer.style.left = '0';
-    tempContainer.style.zIndex = '-1';
-    tempContainer.style.width = '800px'; 
-    tempContainer.style.backgroundColor = '#ffffff'; 
-    document.body.appendChild(tempContainer);
-
-    const opt = {
-      margin: 0.5,
-      filename: `${filename}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, windowWidth: 800 },
-      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-    };
-    
-    html2pdf().set(opt).from(tempContainer).save().then(() => {
-      document.body.removeChild(tempContainer); // Cleanup
-    });
-  }
-};
-
+  
 // --- PWA INSTALLATION LOGIC ---
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e) => {
