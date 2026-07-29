@@ -1,0 +1,26 @@
+{
+  "id": "aiims-cbt-pro",
+  "name": "AIIMS Mock Test Portal",
+  "short_name": "AIIMS CBT",
+  "description": "Official pattern CBT simulator for AIIMS.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5f7fb",
+  "theme_color": "#673ab7",
+  "icons": [
+    {
+      "src": "./logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
