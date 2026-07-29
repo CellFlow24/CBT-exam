@@ -132,7 +132,16 @@ const App = {
         const tbody = document.getElementById('history-table');
         tbody.innerHTML = "";
         data.forEach(row => {
-          tbody.innerHTML += `<tr><td>${row.date}</td><td>${row.setNum}</td><td><strong>${row.score}</strong></td></tr>`;
+          // FIX: Added the new columns and applied the exact colors from your screenshot
+          tbody.innerHTML += `
+            <tr>
+              <td>${row.date}</td>
+              <td style="color:#1976d2; font-weight:bold;">${row.setNum}</td>
+              <td><strong>${row.score}</strong></td>
+              <td style="color:#2e7d32;">${row.correct}</td>
+              <td style="color:#d32f2f;">${row.wrong}</td>
+              <td>${row.skip}</td>
+            </tr>`;
         });
       });
   },
