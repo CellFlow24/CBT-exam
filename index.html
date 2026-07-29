@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AIIMS Mock Test Pro</title>
+  
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <meta name="theme-color" content="#4a148c">
+</head>
+<body>
+
+<div class="container">
+  
+  <!-- INSTALL BANNER -->
+  <div id="install-banner" class="card hidden install-banner">
+    <h3>📱 Install App</h3>
+    <p>Install this app on your device for a full-screen CBT experience.</p>
+    <button type="button" id="btn-install-app" class="btn btn-success">Install Now</button>
+  </div>
+
+  <!-- AUTH PORTAL -->
+  <div id="auth-page" class="card">
+    <div style="text-align: center; margin-bottom: 20px;">
+      <img src="logo.png" alt="Logo" style="max-width: 80px; display: inline-block;">
+    </div>
+    <h1>CBT Login Portal</h1>
+    
+    <div id="login-section">
+      <label>Email ID or Registration No.</label>
+      <input type="text" id="login-id" class="input-field" placeholder="Enter ID">
+      
+      <label>Password</label>
+      <input type="password" id="login-pass" class="input-field" placeholder="Enter Password">
+      
+      <button type="button" class="btn btn-primary" onclick="App.login()">Login</button>
+      <p class="switch-link">New Candidate? <a href="#" onclick="App.toggleAuth()">Register Here</a></p>
+    </div>
+
+    <div id="register-section" class="hidden">
+      <label>Full Name</label>
+      <input type="text" id="reg-name" class="input-field">
+      
+      <label>Age</label>
+      <input type="number" id="reg-age" class="input-field">
+      
+      <label>Gender</label>
+      <select id="reg-gender" class="input-field">
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <label>Email ID</label>
+      <input type="email" id="reg-email" class="input-field">
+      
+      <label>Password</label>
+      <input type="password" id="reg-pass" class="input-field">
+      
+      <button type="button" class="btn btn-success" onclick="App.register()">Register & Get ID</button>
+      <p class="switch-link">Already have an account? <a href="#" onclick="App.toggleAuth()">Login</a></p>
+    </div>
+    
+    <div id="auth-loading" class="hidden loader"></div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboard-page" class="card hidden">
+    <h2>Welcome, <span id="dash-name"></span></h2>
+    <p style="text-align: center; color: #757575;">Reg No: <strong id="dash-reg"></strong></p>
+    
+    <div id="notification-box" class="notification-banner hidden"></div>
+    <div class="paper-status" id="paper-status-box">Loading paper status...</div>
+
+    <button type="button" id="btn-start-exam" class="btn btn-success hidden" onclick="App.startExam()">Start New CBT Exam</button>
+    <button type="button" class="btn btn-outline" onclick="App.downloadRegCard()">Download Reg Card</button>
+    
+    <h3 style="margin-top: 20px;">Your Past Results</h3>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Date</th><th>Set</th><th>Score</th></tr></thead>
+        <tbody id="history-table"></tbody>
+      </table>
+    </div>
+    
+    <button type="button" class="btn btn-secondary" style="margin-top: 20px;" onclick="App.logout()">Logout</button>
+  </div>
+
+  <!-- EXAM SCREEN -->
+  <div id="exam-page" class="hidden">
+    <div class="timer-banner">Time Remaining: <span id="time-display">90:00</span></div>
+    <form id="examForm">
+      <div id="questions-container"></div>
+      <button type="button" class="btn btn-success" style="margin-top:20px;" onclick="App.submitExam()">Submit Exam</button>
+    </form>
+  </div>
+
+</div>
+
+<!-- HIDDEN PRINT AREAS FOR PDF GENERATION -->
+<div id="print-area"></div>
+<div id="reg-card-print"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
