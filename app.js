@@ -8,6 +8,20 @@ const App = {
   examQuestions: [],
   isFlexibleMode: true,
   currentBlock: 0,
+  alertCallback: null, // Used to trigger actions after clicking OK on alerts
+
+  // --- NEW CUSTOM CSS ALERT SYSTEM ---
+  showAlert: (title, message, callback) => {
+    document.getElementById('custom-alert-title').innerText = title;
+    document.getElementById('custom-alert-message').innerHTML = message;
+    document.getElementById('custom-alert-modal').style.display = 'flex';
+    App.alertCallback = callback || null;
+  },
+
+  closeAlert: () => {
+    document.getElementById('custom-alert-modal').style.display = 'none';
+    if (App.alertCallback) App.alertCallback(); // If there is a next step, run it!
+  },
 
   // --- UI CONTROLS ---
   toggleAuth: () => {
@@ -24,7 +38,7 @@ const App = {
         document.getElementById('auth-loading').classList.add('hidden');
         callback(data);
       }).catch(err => {
-        alert("Network Error! Check your connection.");
+        App.showAlert("Network Error", "Check your internet connection.");
         document.getElementById('auth-loading').classList.add('hidden');
       });
   },
@@ -38,19 +52,21 @@ const App = {
       email: document.getElementById('reg-email').value,
       password: document.getElementById('reg-pass').value
     };
-    if(!data.name || !data.email || !data.password) return alert("Fill all required fields!");
+    if(!data.name || !data.email || !data.password) return App.showAlert("Missing Fields", "Please fill all required fields!");
     
     App.postData('register', data, (res) => {
       if(res.success) {
-        // Built-in Custom CSS Success Message
-        const box = document.getElementById('reg-success-box');
-        box.innerHTML = `<h3>Registration Successful!</h3><p>Your Reg ID: <strong style="font-size:1.2rem;">${res.regNum}</strong></p><p>You can now switch to Login.</p>`;
-        box.classList.remove('hidden');
-        
         // Clear fields
         document.getElementById('reg-name').value = ""; document.getElementById('reg-email').value = ""; document.getElementById('reg-pass').value = "";
+        
+        // FIX: Show custom alert, then switch to login page when OK is clicked
+        App.showAlert(
+          "Registration Successful!", 
+          `Your Registration ID is <strong style="color:#673ab7;">${res.regNum}</strong>.<br><br>The ID has been sent to your email.`,
+          () => { App.toggleAuth(); } // Switches back to login
+        );
       } else {
-        alert(res.message);
+        App.showAlert("Registration Failed", res.message);
       }
     });
   },
@@ -60,13 +76,16 @@ const App = {
       loginId: document.getElementById('login-id').value,
       password: document.getElementById('login-pass').value
     };
-    if(!data.loginId || !data.password) return alert("Enter credentials!");
+    if(!data.loginId || !data.password) return App.showAlert("Missing Fields", "Please enter your ID and password!");
     
     App.postData('login', data, (res) => {
       if(res.success) {
         App.currentUser = res;
         App.loadDashboard();
-      } else { alert(res.message); }
+      } else { 
+        // FIX: Custom CSS alert for wrong password
+        App.showAlert("Login Failed", res.message); 
+      }
     });
   },
 
@@ -151,9 +170,8 @@ const App = {
       });
       html += `<button type="button" class="btn btn-success" style="margin-top:20px;" onclick="App.submitExam(false)">Submit Exam</button>`;
       document.getElementById('questions-container').innerHTML = html;
-      App.startTimer(90 * 60); // 90 mins
+      App.startTimer(90 * 60); 
     } else {
-      // STRICT MODE
       document.getElementById('banner-text').innerHTML = `Section Time Left: <span id="time-display">18:00</span>`;
       for (let b = 0; b < 5; b++) {
         html += `<div id="block-${b}" style="display: ${b === 0 ? 'block' : 'none'};">`;
@@ -174,7 +192,7 @@ const App = {
       }
       document.getElementById('questions-container').innerHTML = html;
       App.currentBlock = 0;
-      App.startTimer(18 * 60); // 18 mins per block
+      App.startTimer(18 * 60); 
     }
   },
 
@@ -190,7 +208,6 @@ const App = {
           document.getElementById('block-alert-msg').innerText = `Time is up for Section ${App.currentBlock + 1}. Moving to Section ${App.currentBlock + 2}.`;
           document.getElementById('block-alert-modal').style.display = 'flex';
         } else {
-          // AUTO-SUBMIT: Bypasses checks if time runs out
           App.forceSubmit(); 
         }
       }
@@ -212,7 +229,6 @@ const App = {
     const formData = new FormData(document.getElementById('examForm'));
     let missing = [];
     
-    // Check for missing questions before allowing manual submit
     App.examQuestions.forEach((q, index) => {
       if (!formData.get(q.id)) missing.push(`Q${index + 1}`);
     });
@@ -221,9 +237,10 @@ const App = {
       document.getElementById('missing-questions-list').textContent = missing.join(', ');
       document.getElementById('review-modal').style.display = 'flex';
     } else {
-      if(confirm("Are you sure you want to submit?")) {
+      // Use the custom modal instead of confirm()
+      App.showAlert("Confirm Submission", "Are you sure you want to submit your exam?", () => {
         App.forceSubmit();
-      }
+      });
     }
   },
 
@@ -266,7 +283,7 @@ const App = {
   },
   
   downloadLatestPdf: () => {
-    if(!App.latestPdfData) return alert("Error: PDF data not found.");
+    if(!App.latestPdfData) return App.showAlert("Error", "PDF data not found.");
     const link = document.createElement('a');
     link.href = "data:application/pdf;base64," + App.latestPdfData;
     link.download = App.latestPdfName;
@@ -301,11 +318,11 @@ const App = {
         link.click();
         document.body.removeChild(link);
       } else {
-        alert("Failed to generate PDF. Please try again.");
+        App.showAlert("Download Failed", "Failed to generate PDF. Please try again.");
       }
     });
   }
-};
+}; 
 
 // --- PWA INSTALLATION LOGIC ---
 let deferredPrompt;
