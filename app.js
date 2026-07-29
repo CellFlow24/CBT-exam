@@ -158,54 +158,47 @@ const App = {
     };
 
     document.getElementById('exam-page').innerHTML = "<div class='card text-center'><h2>Submitting...</h2><div class='loader'></div></div>";
-    App.postData('submit', payload, (res) => { App.buildPdfAndShowResult(res); });
+    
+    App.postData('submit', payload, (res) => { 
+      App.buildPdfAndShowResult(res); 
+    });
   },
 
-  // --- PDF GENERATION ---
+  // --- RESULT DISPLAY & NATIVE DOWNLOAD ---
   buildPdfAndShowResult: (res) => {
-    // FIX: Added "/ maxScore" and added "font-weight: bold;" to the answer text
-    let printHtml = `
-      <div class="pdf-container">
-        <h2 style="color:#673ab7; text-align:center; margin-bottom:20px;">AIIMS CBT - Answer Key SET ${res.setNumber}</h2>
-        <p class="pdf-text"><strong>Candidate:</strong> ${App.currentUser.name}</p>
-        <p class="pdf-text"><strong>Reg No:</strong> ${App.currentUser.regNum}</p>
-        <p class="pdf-text"><strong>Final Score:</strong> ${res.score} / ${res.maxScore}</p>
-        <hr style="margin:20px 0; border:1px solid #ccc;">
-    `;
-    
-    res.report.forEach(r => {
-      let clr = r.isCorrect ? "#2e7d32" : (r.userAns === "Skipped" ? "#757575" : "#d32f2f");
-      printHtml += `
-        <div class="pdf-question-block">
-          <p class="pdf-text"><strong>Q${r.qNum}. ${r.question}</strong></p>
-          <p class="pdf-text" style="color:${clr}; margin:8px 0; font-weight: bold;">Your Ans: ${r.userAns} (${r.userText})</p>
-          ${!r.isCorrect ? `<p class="pdf-text" style="color:#2e7d32; font-weight: bold;">Correct Ans: ${r.correctAns} (${r.correctText})</p>` : ''}
-        </div>
-      `;
-    });
-    printHtml += `</div>`;
-    
-    document.getElementById('print-area').innerHTML = printHtml;
+    // Store the server-generated PDF data temporarily for the download button
+    App.latestPdfData = res.fileData;
+    App.latestPdfName = res.fileName;
     
     document.getElementById('exam-page').innerHTML = `
       <div class="card" style="text-align:center;">
         <h2>Exam Complete!</h2>
         <p>Score: <strong>${res.score}</strong> / ${res.maxScore}</p>
         <p style="color:#666;">Detailed result and PDF have been emailed to you successfully.</p>
-        <button class="btn btn-primary" onclick="App.downloadPdf('print-area', '${App.currentUser.name}_Result_SET_${res.setNumber}')">Download Answer Sheet PDF</button>
+        <button class="btn btn-primary" onclick="App.downloadLatestPdf()">Download Answer Sheet PDF</button>
         <button class="btn btn-secondary" onclick="App.loadDashboard()">Back to Dashboard</button>
       </div>
     `;
   },
   
+  downloadLatestPdf: () => {
+    if(!App.latestPdfData) return alert("Error: PDF data not found.");
+    
+    // Natively downloads the EXACT file that was emailed to the user
+    const link = document.createElement('a');
+    link.href = "data:application/pdf;base64," + App.latestPdfData;
+    link.download = App.latestPdfName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  },
+
   downloadRegCard: () => {
-    // 1. Give the user visual feedback that it is loading
     const btn = document.querySelector('button[onclick="App.downloadRegCard()"]');
     const originalText = btn.innerText;
     btn.innerText = "Generating PDF...";
     btn.disabled = true;
 
-    // 2. Send the user's data to the backend
     const payload = {
       name: App.currentUser.name,
       age: App.currentUser.age,
@@ -214,14 +207,11 @@ const App = {
       email: App.currentUser.email
     };
 
-    // 3. Request the PDF directly from Google Apps Script
     App.postData('downloadRegCard', payload, (res) => {
-      // Reset button
       btn.innerText = originalText;
       btn.disabled = false;
       
       if(res.success) {
-        // 4. Force the browser to download the exact PDF file sent from the server
         const link = document.createElement('a');
         link.href = "data:application/pdf;base64," + res.fileData;
         link.download = res.fileName;
@@ -232,35 +222,8 @@ const App = {
         alert("Failed to generate PDF. Please try again.");
       }
     });
-  },
-
-  // Used strictly for downloading the Exam Answer Sheet on the frontend
-  downloadPdf: (elementId, filename) => {
-    const rawHtml = document.getElementById(elementId).innerHTML;
-    
-    const tempContainer = document.createElement('div');
-    tempContainer.innerHTML = rawHtml;
-    tempContainer.style.position = 'absolute';
-    tempContainer.style.top = '0';
-    tempContainer.style.left = '0';
-    tempContainer.style.zIndex = '-1';
-    tempContainer.style.width = '800px'; 
-    tempContainer.style.backgroundColor = '#ffffff'; 
-    document.body.appendChild(tempContainer);
-
-    const opt = {
-      margin: 0.5,
-      filename: `${filename}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, windowWidth: 800 },
-      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-    };
-    
-    html2pdf().set(opt).from(tempContainer).save().then(() => {
-      document.body.removeChild(tempContainer); // Cleanup
-    });
   }
-}; // ALL BRACKETS PROPERLY CLOSED!
+}; // End of App Object
 
 // --- PWA INSTALLATION LOGIC ---
 let deferredPrompt;
