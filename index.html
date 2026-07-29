@@ -40,7 +40,6 @@
     </div>
 
     <div id="register-section" class="hidden">
-      <div id="reg-success-box" class="success-card hidden"></div> <!-- Custom Built-in CSS Message -->
       
       <label>Full Name</label>
       <input type="text" id="reg-name" class="input-field">
@@ -135,6 +134,15 @@
     <h2 style="color: #673ab7;">Section Update</h2>
     <p id="block-alert-msg" style="margin: 15px 0; font-size: 1.1rem;"></p>
     <button class="btn btn-primary" onclick="App.nextBlock()">OK</button>
+  </div>
+</div>
+
+<!-- CUSTOM NOTIFICATION MODAL -->
+<div id="custom-alert-modal" class="modal-overlay">
+  <div class="modal-content">
+    <h2 id="custom-alert-title" style="color: #673ab7; margin-bottom: 10px;">Notification</h2>
+    <p id="custom-alert-message" style="margin-bottom: 20px; font-size: 1.1rem; color: #333;"></p>
+    <button class="btn btn-primary" onclick="App.closeAlert()">OK</button>
   </div>
 </div>
 
