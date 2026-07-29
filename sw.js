@@ -1,4 +1,4 @@
-const CACHE_NAME = 'aiims-cbt-v10';
+const CACHE_NAME = 'aiims-cbt-v11';
 const urlsToCache = [
   './',
   './index.html',
