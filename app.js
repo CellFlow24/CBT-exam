@@ -253,6 +253,7 @@ const App = {
       printElement.style.width = 'auto';
     });
   }
+};
 
 // --- PWA INSTALLATION LOGIC ---
 let deferredPrompt;
