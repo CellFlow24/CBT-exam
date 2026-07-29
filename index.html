@@ -40,6 +40,8 @@
     </div>
 
     <div id="register-section" class="hidden">
+      <div id="reg-success-box" class="success-card hidden"></div> <!-- Custom Built-in CSS Message -->
+      
       <label>Full Name</label>
       <input type="text" id="reg-name" class="input-field">
       
@@ -74,8 +76,22 @@
     <div id="notification-box" class="notification-banner hidden"></div>
     <div class="paper-status" id="paper-status-box">Loading paper status...</div>
 
-    <button type="button" id="btn-start-exam" class="btn btn-success hidden" onclick="App.startExam()">Start New CBT Exam</button>
-    <button type="button" class="btn btn-outline" onclick="App.downloadRegCard()">Download Reg Card</button>
+    <div id="exam-start-container" class="hidden">
+      <!-- EXAM MODE TOGGLE -->
+      <div class="switch-container">
+        <label class="switch">
+          <input type="checkbox" id="mode-toggle" checked>
+          <span class="slider"></span>
+        </label>
+        <div>
+          <span class="switch-label">Flexible Mode (All at once)</span>
+          <span class="switch-desc"><strong>Off:</strong> Strict Simulator (18-min blocks, no going back).<br><strong>On:</strong> 100 questions displayed together, 90 mins, manual submit.</span>
+        </div>
+      </div>
+      <button type="button" id="btn-start-exam" class="btn btn-success" onclick="App.startExam()">Start New CBT Exam</button>
+    </div>
+
+    <button type="button" class="btn btn-outline" style="margin-top:15px;" onclick="App.downloadRegCard()">Download Reg Card</button>
     
     <h3 style="margin-top: 20px;">Your Past Results</h3>
     <div class="table-wrapper">
@@ -90,18 +106,37 @@
 
   <!-- EXAM SCREEN -->
   <div id="exam-page" class="hidden">
-    <div class="timer-banner">Time Remaining: <span id="time-display">90:00</span></div>
+    <div class="timer-banner" id="banner-text">Time Remaining: <span id="time-display">90:00</span></div>
     <form id="examForm">
       <div id="questions-container"></div>
-      <button type="button" class="btn btn-success" style="margin-top:20px;" onclick="App.submitExam()">Submit Exam</button>
+      <!-- Submit button is added dynamically based on mode -->
     </form>
   </div>
 
 </div>
 
-<!-- HIDDEN PRINT AREAS FOR PDF GENERATION -->
-<div id="print-area"></div>
-<div id="reg-card-print"></div>
+<!-- UNANSWERED QUESTIONS MODAL -->
+<div id="review-modal" class="modal-overlay">
+  <div class="modal-content">
+    <h2 style="color: #d32f2f;">Unanswered Questions</h2>
+    <p>You have skipped the following questions. They will receive 0 points.</p>
+    <div id="missing-questions-list" class="missing-list"></div>
+    <p>Would you like to go back, or submit anyway?</p>
+    <div style="display:flex; gap:10px; margin-top:20px;">
+      <button class="btn btn-secondary" style="margin-bottom:0;" onclick="document.getElementById('review-modal').style.display='none'">Go Back</button>
+      <button class="btn btn-warning" style="margin-bottom:0;" onclick="App.forceSubmit()">Submit Anyway</button>
+    </div>
+  </div>
+</div>
+
+<!-- STRICT MODE BLOCK UPDATE MODAL -->
+<div id="block-alert-modal" class="modal-overlay">
+  <div class="modal-content">
+    <h2 style="color: #673ab7;">Section Update</h2>
+    <p id="block-alert-msg" style="margin: 15px 0; font-size: 1.1rem;"></p>
+    <button class="btn btn-primary" onclick="App.nextBlock()">OK</button>
+  </div>
+</div>
 
 <script src="app.js"></script>
 </body>
