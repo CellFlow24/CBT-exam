@@ -132,10 +132,11 @@ const App = {
         const tbody = document.getElementById('history-table');
         tbody.innerHTML = "";
         data.forEach(row => {
-          // FIX: Added the new columns and applied the exact colors from your screenshot
+          // FIX: Added the Subject column to the frontend table
           tbody.innerHTML += `
             <tr>
-              <td>${row.date}</td>
+              <td style="font-size: 0.85rem;">${row.date}</td>
+              <td style="font-size: 0.85rem; font-weight: bold; color: #4a148c;">${row.subject}</td>
               <td style="color:#1976d2; font-weight:bold;">${row.setNum}</td>
               <td><strong>${row.score}</strong></td>
               <td style="color:#2e7d32;">${row.correct}</td>
@@ -145,7 +146,7 @@ const App = {
         });
       });
   },
-
+  
   // --- EXAM LOGIC ---
   startExam: () => {
     App.isFlexibleMode = document.getElementById('mode-toggle').checked;
@@ -280,9 +281,13 @@ const App = {
     App.latestPdfData = res.fileData;
     App.latestPdfName = res.fileName;
     
+    // FIX: Show the specific Subject Name on the success screen
+    const subjectTitle = res.subject || "AIIMS CBT Mock Test";
+    
     document.getElementById('exam-page').innerHTML = `
       <div class="card" style="text-align:center;">
         <h2>Exam Complete!</h2>
+        <h4 style="color:#673ab7; margin-bottom: 15px;">${subjectTitle} - SET ${res.setNumber}</h4>
         <p>Score: <strong>${res.score}</strong> / ${res.maxScore}</p>
         <p style="color:#666;">Detailed result and PDF have been emailed to you successfully.</p>
         <button class="btn btn-primary" onclick="App.downloadLatestPdf()">Download Answer Sheet PDF</button>
